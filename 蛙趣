@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手机留言社区</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 0 0 60px 0;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .message {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        
+        .message:last-child {
+            border-bottom: none;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .message-author {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .message-date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .message-content {
+            margin-bottom: 10px;
+        }
+        
+        .message-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn.liked {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-item {
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .nav-item.active {
+            color: #3498db;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            z-index: 1001;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            border-bottom: 2px solid #3498db;
+            color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .replies {
+            margin: 10px 0;
+            padding-left: 15px;
+            border-left: 2px solid #eee;
+        }
+        
+        .reply {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .reply:last-child {
+            border-bottom: none;
+        }
+        
+        .reply-form {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .reply-form.active {
+            display: block;
+        }
+        
+        .admin-badge, .user-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .user-badge {
+            background: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">留言社区</div>
+                <div>
+                    <button id="userAuthBtn" class="btn">登录/注册</button>
+                    <button id="adminLoginBtn" class="btn">管理员</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="userPanel" class="card" style="display: none;">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div>
+                    <h3 id="userName">用户</h3>
+                    <p id="userEmail" style="color: #666; font-size: 0.9rem;">user@example.com</p>
+                </div>
+            </div>
+            <button id="logoutBtn" class="submit-btn btn-danger">退出登录</button>
+        </section>
+
+        <section id="adminPanel" class="card" style="display: none;">
+            <h2>管理员面板</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="totalMessages">0</div>
+                    <div style="font-size: 0.8rem; color: #666;">总留言数</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="totalReplies">0</div>
+                    <div style="font-size: 0.8rem; color: #666;">总回复数</div>
+                </div>
+            </div>
+            <button id="logoutAdminBtn" class="submit-btn btn-danger">退出管理员</button>
+        </section>
+
+        <section class="card">
+            <h1 id="welcomeTitle">欢迎来到留言社区</h1>
+            <p id="welcomeText">在这里分享想法、交流观点，与社区成员互动。</p>
+        </section>
+
+        <div style="position: relative; margin: 15px 0;">
+            <input type="text" id="searchInput" class="form-input" placeholder="搜索留言...">
+        </div>
+
+        <section class="card">
+            <h2>社区留言</h2>
+            <div id="messagesList" style="max-height: 400px; overflow-y: auto;">
+                <!-- 留言将动态添加到这里 -->
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" data-tab="messages">
+            <div>首页</div>
+        </div>
+        <div class="nav-item" data-tab="hot">
+            <div>热门</div>
+        </div>
+        <div class="nav-item" data-tab="profile">
+            <div>我的</div>
+        </div>
+    </nav>
+
+    <button class="fab" id="fabBtn">+</button>
+
+    <!-- 留言表单模态框 -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <button id="closeMessageModal" class="close-modal">×</button>
+            <h2>发布新留言</h2>
+            <form id="messageForm">
+                <div class="form-group">
+                    <textarea id="messageContent" class="form-input" placeholder="请输入您的留言内容..." required maxlength="500"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">发布留言</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用户登录/注册模态框 -->
+    <div id="userAuthModal" class="modal">
+        <div class="modal-content">
+            <button id="closeUserAuthModal" class="close-modal">×</button>
+            <h2>用户登录/注册</h2>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="login">登录</button>
+                <button class="tab-button" data-tab="register">注册</button>
+            </div>
+            
+            <form id="loginForm" class="tab-content active">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" class="form-input" placeholder="邮箱" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" class="form-input" placeholder="密码" required>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+            
+            <form id="registerForm" class="tab-content">
+                <div class="form-group">
+                    <input type="text" id="registerName" class="form-input" placeholder="用户名" required maxlength="20">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" class="form-input" placeholder="邮箱" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" class="form-input" placeholder="密码（至少6位）" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="确认密码" required minlength="6">
+                </div>
+                <button type="submit" class="submit-btn">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理员登录模态框 -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <button id="closeAdminModal" class="close-modal">×</button>
+            <h2>管理员登录</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <input type="text" id="adminUsername" class="form-input" placeholder="管理员用户名" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="adminPassword" class="form-input" placeholder="管理员密码" required>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666; text-align: center;">
+                提示：默认管理员账号 admin / 123456
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 留言社区应用
+        function MobileMessageBoard() {
+            // 应用状态
+            this.messages = this.loadMessages();
+            this.users = this.loadUsers();
+            this.isAdmin = localStorage.getItem('isAdmin') === 'true' || false;
+            this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+            this.currentTab = 'messages';
+            this.filteredMessages = this.messages.slice();
+            this.debounceTimer = null;
+            
+            this.init();
+        }
+        
+        // 初始化应用
+        MobileMessageBoard.prototype.init = function() {
+            this.bindEvents();
+            this.renderMessages();
+            this.updateUI();
+        };
+        
+        // 绑定事件监听器
+        MobileMessageBoard.prototype.bindEvents = function() {
+            var self = this;
+            
+            // 模态框控制
+            document.getElementById('fabBtn').addEventListener('click', function() {
+                if (self.currentUser) {
+                    self.showModal('messageModal');
+                } else {
+                    self.showToast('请先登录后再发布留言');
+                    self.showModal('userAuthModal');
+                }
+            });
+            
+            // 模态框关闭按钮
+            document.getElementById('closeMessageModal').addEventListener('click', function() {
+                self.hideModal('messageModal');
+            });
+            
+            document.getElementById('closeUserAuthModal').addEventListener('click', function() {
+                self.hideModal('userAuthModal');
+            });
+            
+            document.getElementById('closeAdminModal').addEventListener('click', function() {
+                self.hideModal('adminLoginModal');
+            });
+            
+            // 表单提交
+            document.getElementById('messageForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                self.handleMessageSubmit(e);
+            });
+            
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                self.handleLogin(e);
+            });
+            
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                self.handleRegister(e);
+            });
+            
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                self.handleAdminLogin(e);
+            });
+            
+            // 用户认证按钮
+            document.getElementById('userAuthBtn').addEventListener('click', function() {
+                if (self.currentUser) {
+                    self.logoutUser();
+                } else {
+                    self.showModal('userAuthModal');
+                }
+            });
+            
+            document.getElementById('adminLoginBtn').addEventListener('click', function() {
+                if (self.isAdmin) {
+                    self.logoutAdmin();
+                } else {
+                    self.showModal('adminLoginModal');
+                }
+            });
+            
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                self.logoutUser();
+            });
+            
+            document.getElementById('logoutAdminBtn').addEventListener('click', function() {
+                self.logoutAdmin();
+            });
+            
+            // 搜索框
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                self.handleSearch(e.target.value);
+            });
+            
+            // 模态框外部点击关闭
+            var modals = document.querySelectorAll('.modal');
+            for (var i = 0; i < modals.length; i++) {
+                modals[i].addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        self.hideModal(this.id);
+                    }
+                });
+            }
+            
+            // 留言列表事件委托
+            document.getElementById('messagesList').addEventListener('click', function(e) {
+                self.handleMessageAction(e);
+            });
+            
+            // 底部导航切换
+            var navItems = document.querySelectorAll('.nav-item');
+            for (var i = 0; i < navItems.length; i++) {
+                navItems[i].addEventListener('click', function(e) {
+                    self.switchTab(this.getAttribute('data-tab'));
+                });
+            }
+            
+            // 登录/注册标签切换
+            var tabButtons = document.querySelectorAll('.tab-button');
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].addEventListener('click', function(e) {
+                    self.switchAuthTab(this.getAttribute('data-tab'));
+                });
+            }
+            
+            // 键盘事件
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    self.hideAllModals();
+                }
+            });
+        };
+        
+        // 从本地存储加载留言数据
+        MobileMessageBoard.prototype.loadMessages = function() {
+            try {
+                var stored = localStorage.getItem('messages');
+                return stored ? JSON.parse(stored) : this.getDefaultMessages();
+            } catch (e) {
+                console.error('解析留言数据失败:', e);
+                this.showToast('数据加载失败，已恢复默认数据');
+                return this.getDefaultMessages();
+            }
+        };
+        
+        // 获取默认留言数据
+        MobileMessageBoard.prototype.getDefaultMessages = function() {
+            return [
+                {
+                    id: 1,
+                    author: "社区用户",
+                    content: "欢迎来到留言社区！这是一个简洁的手机版留言板应用。",
+                    date: this.formatDate(new Date()),
+                    likes: 3,
+                    liked: false,
+                    userId: "default1",
+                    replies: [
+                        {
+                            id: 101,
+                            author: "李四",
+                            content: "这个留言板设计得很不错！",
+                            date: this.formatDate(new Date(Date.now() - 3600000)),
+                            userId: "default2"
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    author: "张三",
+                    content: "今天天气真好，适合户外活动！",
+                    date: this.formatDate(new Date(Date.now() - 7200000)),
+                    likes: 1,
+                    liked: false,
+                    userId: "default3",
+                    replies: []
+                }
+            ];
+        };
+        
+        // 从本地存储加载用户数据
+        MobileMessageBoard.prototype.loadUsers = function() {
+            try {
+                var stored = localStorage.getItem('users');
+                return stored ? JSON.parse(stored) : this.getDefaultUsers();
+            } catch (e) {
+                console.error('解析用户数据失败:', e);
+                return this.getDefaultUsers();
+            }
+        };
+        
+        // 获取默认用户数据
+        MobileMessageBoard.prototype.getDefaultUsers = function() {
+            return [
+                {
+                    id: "default1",
+                    name: "社区用户",
+                    email: "user1@example.com",
+                    password: "123456",
+                    joinDate: new Date().toISOString()
+                },
+                {
+                    id: "default2",
+                    name: "李四",
+                    email: "user2@example.com",
+                    password: "123456",
+                    joinDate: new Date().toISOString()
+                },
+                {
+                    id: "default3",
+                    name: "张三",
+                    email: "user3@example.com",
+                    password: "123456",
+                    joinDate: new Date().toISOString()
+                }
+            ];
+        };
+        
+        // 格式化日期显示
+        MobileMessageBoard.prototype.formatDate = function(date) {
+            var now = new Date();
+            var diff = now - date;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+            
+            return date.getFullYear() + '年' + 
+                   (date.getMonth() + 1) + '月' + 
+                   date.getDate() + '日 ' + 
+                   this.padZero(date.getHours()) + ':' + 
+                   this.padZero(date.getMinutes());
+        };
+        
+        // 补零函数
+        MobileMessageBoard.prototype.padZero = function(num) {
+            return num < 10 ? '0' + num : num;
+        };
+        
+        // 渲染留言列表
+        MobileMessageBoard.prototype.renderMessages = function() {
+            var container = document.getElementById('messagesList');
+            
+            if (this.filteredMessages.length === 0) {
+                container.innerHTML = this.getEmptyStateHTML();
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < this.filteredMessages.length; i++) {
+                html += this.getMessageHTML(this.filteredMessages[i]);
+            }
+            
+            container.innerHTML = html;
+            
+            // 绑定回复表单事件
+            this.bindReplyEvents();
+        };
+        
+        // 获取空状态HTML
+        MobileMessageBoard.prototype.getEmptyStateHTML = function() {
+            var icons = { messages: '💬', hot: '🔥', profile: '👤' };
+            var messages = {
+                messages: '暂无留言',
+                hot: '暂无热门留言',
+                profile: '个人中心'
+            };
+            
+            return '<div class="empty-state">' +
+                   '<div class="empty-state-icon">' + (icons[this.currentTab] || '💬') + '</div>' +
+                   '<p>' + (messages[this.currentTab] || '暂无内容') + '</p>' +
+                   '<p style="margin-top: 16px; font-size: 0.9rem; color: #7f8c8d;">' +
+                   (this.currentTab === 'profile' && !this.currentUser ? 
+                    '请先登录查看个人信息' : '快来发布第一条留言吧！') +
+                   '</p>' +
+                   (this.currentTab === 'profile' && !this.currentUser ? 
+                    '<button id="loginFromProfile" class="submit-btn" style="margin-top: 16px;">立即登录</button>' : '') +
+                   '</div>';
+        };
+        
+        // 获取留言HTML
+        MobileMessageBoard.prototype.getMessageHTML = function(message) {
+            var isCurrentUserMessage = this.currentUser && message.userId === this.currentUser.id;
+            var isAdminMessage = message.author === 'admin';
+            
+            var repliesHTML = '';
+            if (message.replies && message.replies.length > 0) {
+                repliesHTML = '<div class="replies">';
+                for (var i = 0; i < message.replies.length; i++) {
+                    var reply = message.replies[i];
+                    var isCurrentUserReply = this.currentUser && reply.userId === this.currentUser.id;
+                    var isAdminReply = reply.author === 'admin';
+                    
+                    repliesHTML += '<div class="reply">' +
+                        '<div class="message-header">' +
+                        '<div class="message-author">' +
+                        this.escapeHtml(reply.author) +
+                        (isAdminReply ? '<span class="admin-badge">管理员</span>' : '') +
+                        (isCurrentUserReply ? '<span class="user-badge">我</span>' : '') +
+                        '</div>' +
+                        '<div class="message-date">' + this.escapeHtml(reply.date) + '</div>' +
+                        '</div>' +
+                        '<div class="message-content">' + this.escapeHtml(reply.content) + '</div>' +
+                        ((this.isAdmin || isCurrentUserReply) ? 
+                        '<button class="action-btn delete-btn delete-reply-btn" data-message-id="' + message.id + '" data-reply-id="' + reply.id + '">删除回复</button>' : '') +
+                        '</div>';
+                }
+                repliesHTML += '</div>';
+            }
+            
+            return '<div class="message" data-id="' + message.id + '">' +
+                '<div class="message-header">' +
+                '<div class="message-author">' +
+                this.escapeHtml(message.author) +
+                (isAdminMessage ? '<span class="admin-badge">管理员</span>' : '') +
+                (isCurrentUserMessage ? '<span class="user-badge">我</span>' : '') +
+                '</div>' +
+                '<div class="message-date">' + this.escapeHtml(message.date) + '</div>' +
+                '</div>' +
+                '<div class="message-content">' + this.escapeHtml(message.content) + '</div>' +
+                repliesHTML +
+                '<div class="message-actions">' +
+                '<button class="action-btn like-btn ' + (message.liked ? 'liked' : '') + '" data-id="' + message.id + '">' +
+                '赞 (' + message.likes + ')' +
+                '</button>' +
+                '<button class="action-btn reply-btn" data-id="' + message.id + '">回复</button>' +
+                ((this.isAdmin || isCurrentUserMessage) ? 
+                '<button class="action-btn delete-btn delete-message-btn" data-id="' + message.id + '">删除</button>' : '') +
+                '</div>' +
+                '<form class="reply-form" data-message-id="' + message.id + '">' +
+                '<div class="form-group">' +
+                '<textarea class="form-input reply-content" placeholder="回复内容..." required maxlength="300"></textarea>' +
+                '</div>' +
+                '<div style="display: flex; gap: 8px;">' +
+                '<button type="submit" class="submit-btn" style="flex: 1;">提交回复</button>' +
+                '<button type="button" class="submit-btn cancel-reply-btn" style="background-color: #95a5a6; flex: 0.5;">取消</button>' +
+                '</div>' +
+                '</form>' +
+                '</div>';
+        };
+        
+        // 绑定回复相关事件
+        MobileMessageBoard.prototype.bindReplyEvents = function() {
+            var self = this;
+            
+            // 回复按钮点击事件
+            var replyBtns = document.querySelectorAll('.reply-btn');
+            for (var i = 0; i < replyBtns.length; i++) {
+                replyBtns[i].addEventListener('click', function(e) {
+                    if (!self.currentUser) {
+                        self.showToast('请先登录后再回复');
+                        self.showModal('userAuthModal');
+                        return;
+                    }
+                    
+                    var messageId = parseInt(this.getAttribute('data-id'));
+                    var messageElement = this.closest('.message');
+                    var replyForm = messageElement.querySelector('.reply-form');
+                    replyForm.classList.toggle('active');
+                });
+            }
+            
+            // 取消回复按钮
+            var cancelReplyBtns = document.querySelectorAll('.cancel-reply-btn');
+            for (var i = 0; i < cancelReplyBtns.length; i++) {
+                cancelReplyBtns[i].addEventListener('click', function(e) {
+                    var replyForm = this.closest('.reply-form');
+                    replyForm.classList.remove('active');
+                    replyForm.reset();
+                });
+            }
+            
+            // 回复表单提交
+            var replyForms = document.querySelectorAll('.reply-form');
+            for (var i = 0; i < replyForms.length; i++) {
+                replyForms[i].addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    self.handleReplySubmit(e);
+                });
+            }
+            
+            // 删除按钮事件
+            if (this.isAdmin || this.currentUser) {
+                var deleteMessageBtns = document.querySelectorAll('.delete-message-btn');
+                for (var i = 0; i < deleteMessageBtns.length; i++) {
+                    deleteMessageBtns[i].addEventListener('click', function(e) {
+                        var messageId = parseInt(this.getAttribute('data-id'));
+                        self.deleteMessage(messageId);
+                    });
+                }
+                
+                var deleteR
